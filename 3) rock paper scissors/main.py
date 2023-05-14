@@ -6,55 +6,93 @@ import random
 # idea for later project = make rock paper scissors with sockets, to have 2 players againts each other.
 
 
-def player_choice_and_validation():
-    # control = 1
-    while True:
-        choice_input = input("Rock, Paper or scissors? \n")
-        choice_input = choice_input.lower()
-        if choice_input in ["rock", "paper", "scissors"]:
-            return choice_input
+class RockPaperScissors:
+    def __init__(self, computer_opponent):
+        self._choice_interpreter = {0: "Rock", 1: "Paper", 2: "Scissors"}
+        self._player1choice = None
+        self._player2choice = None #computer will be defaulted as player 2
+
+        if computer_opponent.lower().strip() == "true":
+            self._computer_opponent = True
         else:
-            print("Error! make sure your input is correct. try again!")
-            pass
+            self._computer_opponent = False
 
+        self._player_turn = 1
 
-def generate_computer():
-    choice = random.randint(1, 3)
-    if choice == 1:
-        return "rock"
-    elif choice == 2:
-        return "paper"
-    else:
-        return "scissors"
-
-# change from print to return
-# 0 draw, 1 win, 2 lose
-def did_the_player_win(player_option, computer_option):
-    if player_option == computer_option:
-        print("draw!")
-    if player_option == "rock":
-        if computer_option == "paper":
-            print("you lost!") # return lose
+    def switch_turn(self):
+        if self._player_turn == 1:
+            self._player_turn = 2
         else:
-            print("you won!") # return win
-    if player_option == "paper":
-        if computer_option == "scissors":
-            print("you lost!") # return lose
+            self._player_turn = 1
+
+    def generate_computer(self):
+        self._player2choice = random.randint(0, 2)
+        self.switch_turn()
+        return self._player2choice
+
+    def generate_player(self):
+        while True:
+            try:
+                choice = int(input(f"your turn, player {self._player_turn}. Choose: \n 0 for rock\n 1 for paper\n 2 for scissors\n"))
+                if self._player_turn == 1:
+                    self._player1choice = choice
+                else:
+                    self._player2choice = choice
+                self.switch_turn()
+                return choice
+            except ValueError:
+                print("make sure you typed in a number!")
+
+    def interpret_choice(self, choice):
+        return self._choice_interpreter[choice]
+
+    def draw_text(self):
+        print("Draw! no one wins!")
+
+    def playerwin(self, player):
+        print(f"Player {player} Won!")
+
+    def who_won(self):
+        if self._player1choice == self._player2choice:
+            return self.draw_text()
+        elif self._player1choice == 0:
+            if self._player2choice == 1:
+                self.playerwin(2)
+            else:
+                self.playerwin(1)
+
+        elif self._player1choice == 1:
+            if self._player2choice == 2:
+                self.playerwin(2)
+            else:
+                self.playerwin(1)
+
         else:
-            print("you won!") # return win
-    if player_option == "scissors":
-        if computer_option == "rock":
-            print("you lost!") # return lose
+            if self._player2choice == 0:
+                self.playerwin(2)
+            else:
+                self.playerwin(1)
+
+    def announcement(self):
+        print(f"player 1 chose {self.interpret_choice(self._player1choice)}")
+        print(f"player 2 chose {self.interpret_choice(self._player2choice)}")
+        print("The result is...")
+        self.who_won()
+
+
+    def generate_round(self):
+        if self._player_turn == 1:
+            self.generate_player()
+            if self._computer_opponent:
+                self.generate_computer()
+            else:
+                self.generate_player()
+            self.announcement()
         else:
-            print("you won!") # return win
-
-
-
-
+            pass # some error that the game needs to be reset
 
 
 if __name__ == '__main__':
     print("welcome to Rock Paper Scissors")
-    did_the_player_win(player_choice_and_validation(), generate_computer())
-    did_the_player_win(player_choice_and_validation(), generate_computer())
-    did_the_player_win(player_choice_and_validation(), generate_computer())
+    new_game = RockPaperScissors("false")
+    new_game.generate_round()
